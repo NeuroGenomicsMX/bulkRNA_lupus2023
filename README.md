@@ -1,3 +1,4 @@
 # bulkRNA_lupus2023
 
-working directory: `/mnt/Citosina/amedina/alhernandez/Lupus/DGE_SS/ASE/resultados/star_salmon`
+- working directory: `/mnt/Citosina/amedina/alhernandez/Lupus/DGE_SS/ASE/resultados/star_salmon`
+- metadata: `/mnt/Citosina/amedina/lupus/RNA_lupus/metadata/metadata.csv`
