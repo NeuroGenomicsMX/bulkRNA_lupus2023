@@ -4,7 +4,7 @@
 
 **Important files location**
 
-- Fasta files: `/mnt/Citosina/amedina/cdiaz/cdiaz/usftp188.novogene.com/01.RawData/`
+- Fasta files: `/mnt/Citosina/amedina/cdiaz/usftp188.novogene.com/01.RawData/`
 - Raw Salmon output files: `/mnt/Citosina/amedina/alhernandez/Lupus/DGE_SS/ASE/resultados/star_salmon/QR*/quant.sf`
 - Working Directory: `/mnt/Citosina/amedina/lupus/RNA_lupus/`
 - Metadata: `/mnt/Citosina/amedina/lupus/RNA_lupus/metadata/metadata.csv`
