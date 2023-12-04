@@ -1,4 +1,3 @@
-# Import salmon counts
 # Author: Sofia Salazar
 # Date: December 2023
 # Import transcript abundance with tximport

@@ -14,7 +14,6 @@ counts <- assays(dds)$counts
 vsd <- vst(counts, blind=FALSE)
 assays(dds)$vsd <- vsd
 
-save(dds, file = paste0(workdir, 'counts/dds_vsd.RData'))
 # -------------
 # Plot PCA
 
@@ -114,4 +113,3 @@ p2 <- ggplot(pca_no_mo_df, aes(x = PC1, y = PC2, color = cell_name, shape = Grou
 ggsave(p2, file = paste0(figdir,'PCA_no_mo_grouped.png'), dpi = 300)
 ggsave(p2, file = '/mnt/Citosina/amedina/ssalazar/RNA_lupus/figures/PCA_no_mo_grouped.png', dpi = 300)
 save(p2, file = paste0(figdir, 'PCA_no_mo_grouped.RData'))
-
