@@ -9,3 +9,5 @@
 - dds + vst counts: `/mnt/Citosina/amedina/lupus/RNA_lupus/counts/dds_vsd.RData`
 
 - Patient-Control analysis per cell type files (scripts and figures): `/mnt/Citosina/amedina/lupus/RNA_lupus/DE_P_C_celltypes`
+
+Put your results in the [slides](https://docs.google.com/presentation/d/1BnyCKKPgfXBw9XkvsQ5q5YqqkvZhU0goQJVFWjv50fk/edit?usp=sharing)
