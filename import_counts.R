@@ -4,32 +4,53 @@
 # Import transcript abundance with tximport
 # ---
 
+# qlogin
+# module load r/4.0.2
+# R
+
+# ---
+
 library(tximport)
 library(DESeq2)
 
+# --- 
+# Loading data
 workdir <- '/mnt/Citosina/amedina/lupus/RNA_lupus/'
 metadata <- read.csv(file = paste0(workdir, 'metadata/metadata.csv'), header = T)
 samples <- metadata$sample_ID
-dir <- '/mnt/Citosina/amedina/alhernandez/Lupus/DGE_SS/ASE/resultados'
+filedir <- '/mnt/Citosina/amedina/alhernandez/Lupus/DGE_SS/ASE/resultados/star_salmon'
 
-files <- file.path(dir, "star_salmon", samples, "quant.sf")
+files <- c()
+
+for (sample in samples) {
+  sub_dir <- file.path(filedir, sample)
+  files_in_sample <- list.files(path = sub_dir, pattern = "quant.sf$", full.names = TRUE, recursive = TRUE)
+  files <- c(files, files_in_sample)
+}
+length(files)
+# [1] 165
+
 names(files) <- samples
 all(file.exists(files))
 # [1] TRUE
 tx2gene <- read.table(paste0(dir, '/star_salmon/salmon_tx2gene.tsv'), sep = '\t')
 colnames(tx2gene) <- c('TXNAME', 'GENEID', 'GENEID2')
-head(tx2gene, 20)
+head(tx2gene, 2)
+# TXNAME  GENEID GENEID2
+# # 1   rna0 DDX11L1 DDX11L1
+# 2   rna1  WASH7P  WASH7P
 
+# ---
 # gene-level summarization
 txi <- tximport(files, type = "salmon", tx2gene = tx2gene)
 names(txi)
 
-head(txi$counts)
+head(txi$counts, 2)
 
 metadata$Group <- as.factor(metadata$Group)
 rownames(metadata) <- colnames(txi$counts)
 all(rownames(metadata) == metadata$sample_ID)
-
+# [1] TRUE
 
 dds <- DESeqDataSetFromTximport(txi, metadata, ~Group)
 head(assays(dds)$counts)
