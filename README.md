@@ -1,5 +1,7 @@
 # bulkRNA_lupus2023
 
+![diseno](diseno_experimental.png)
+
 **Important files location**
 
 - Raw Salmon output files: `/mnt/Citosina/amedina/alhernandez/Lupus/DGE_SS/ASE/resultados/star_salmon/QR*/quant.sf`
