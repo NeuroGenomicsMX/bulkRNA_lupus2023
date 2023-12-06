@@ -8,6 +8,7 @@
 - Raw Salmon output files: `/mnt/Citosina/amedina/alhernandez/Lupus/DGE_SS/ASE/resultados/star_salmon/QR*/quant.sf`
 - Working Directory: `/mnt/Citosina/amedina/lupus/RNA_lupus/`
 - Metadata: `/mnt/Citosina/amedina/lupus/RNA_lupus/metadata/metadata.csv`
+- metadata, txi and tx2gene file in R: `/mnt/Citosina/amedina/lupus/RNA_lupus/counts/txi.RData` 
 - Imported counts with tximport (dds): `/mnt/Citosina/amedina/lupus/RNA_lupus/counts/dds_txi.RData`
 - dds + vst counts: `/mnt/Citosina/amedina/lupus/RNA_lupus/counts/dds_vsd.RData`
 
