@@ -1,0 +1,98 @@
+# Plot Volcano
+# Author: Sofia Salazar, Evelia Coss
+# Date: 26 Nov 2023
+# Plot volcano plots of DE results
+# ----
+
+# Usage: make_volcano(indir, figdir, abslogFC = 1, noGeneNames = 20)
+
+# Arguments
+# indir = input directory
+# figdir =  output directory for figures
+# abslogFC = log2FoldChange cutoff value, default = 1
+# noGeneNames = Number of genes with higher expression to name them, default = 20
+
+# ----
+# Libraries
+library(ggplot2)
+library(tidyverse)
+
+# indir <- '/mnt/Citosina/amedina/lupus/RNA_lupus/DE_P_C_celltypes/DE_files/'
+# figdir <- '/mnt/Citosina/amedina/lupus/RNA_lupus/DE_P_C_celltypes/figures/'
+
+## --- Define plotting function ----
+# Define plotting function
+plot_volcano <- function(file_name, figdir, abslogFC = 1, noGeneNames = 20, plotTitle = F){ 
+  # ---
+  # file_name: "DE_plotName.csv" with DESeq results are, the plotName part will be used as plot title
+  # figdir: place where volcano plots will be saved
+  # abslogFC: threshold of logFC (absolute value) for coloring the DE genes
+  # noGeneNames: maximum number of genes to write their name for each group (downregulated/upregulated)
+  # plotTitle: add a title to the plot
+  # ---
+  plot_name <- gsub("^DE_(.+)\\.csv$", "\\1", file_name)
+  if (plotTitle == T) {
+    ptitle <- plot_name
+  } else{ptitle <- ''}
+  
+  df <- read.csv(file = paste0(file_name), row.names = 'X')
+  df <- na.omit(df)
+  # --
+  # Add expression column
+  df <- df %>% 
+    mutate(Expression = case_when(log2FoldChange >= abslogFC & padj < 0.05 ~ "Up-regulated",
+                                  log2FoldChange <= -(abslogFC) & padj < 0.05 ~ "Down-regulated",
+                                  TRUE ~ "Unchanged"))
+  # --
+  # Plot
+  volcanoplot <- ggplot(df, aes(log2FoldChange, -log(padj,10))) +
+    geom_point(aes(color = Expression), size = 0.7) +
+    labs(title = ptitle) +
+    xlab(expression("log"[2]*"FC")) + 
+    ylab(expression("-log"[10]*"p-adj")) +
+    scale_color_manual(values = c("dodgerblue3", "gray50", "firebrick3")) +
+    guides(colour = guide_legend(override.aes = list(size=1.5))) +
+    geom_vline(xintercept = abslogFC, linetype = "dashed", color = "black", alpha = 0.5) +
+    geom_vline(xintercept = -(abslogFC), linetype = "dashed", color = "black", alpha = 0.5) +
+    geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "black", alpha = 0.5)
+  
+  
+  top <- noGeneNames # no. of highlighted genes in plot
+  top_genes <- bind_rows(df %>% 
+                           filter(Expression == 'Up-regulated') %>% 
+                           arrange(padj, desc(abs(log2FoldChange))) %>% 
+                           head(top),
+                         df %>% 
+                           filter(Expression == 'Down-regulated') %>% 
+                           arrange(padj, desc(abs(log2FoldChange))) %>% 
+                           head(top)
+  )
+  dim(df[df$Expression == 'Up-regulated',])
+  dim(df[df$Expression == 'Down-regulated',])
+  
+  volcanoplot_names <-  volcanoplot +
+    ggrepel::geom_label_repel(data = top_genes,
+                              mapping = aes(log2FoldChange, -log(padj,10), label = rownames(top_genes)),
+                              size = 2) + theme_classic() + theme(legend.position = 'bottom')
+  ggsave(file = paste0(figdir, "volcano_", plot_name,".png"), plot = volcanoplot_names, dpi = 300)
+  # save Rdata object
+  save(volcanoplot_names, file =paste0(figdir, "volcano_", plot_name, ".RData"))
+} # end function
+
+# --- Make plots ----
+make_volcano <- function(indir, figdir, abslogFC = 1, noGeneNames = 20){
+  # --- Load data -----
+  # change directory
+  setwd(indir)
+  # change to place where "DE_plotName.csv" files are:
+  files <- dir(getwd(), pattern = "^DE_*")
+  # ---- Multiple plot -----
+  for (f in files){
+  print(f)
+  plot_volcano(f, figdir = figdir,
+               abslogFC = abslogFC,
+               noGeneNames = noGeneNames,
+               plotTitle = F)
+
+  } # end for
+} # end function
