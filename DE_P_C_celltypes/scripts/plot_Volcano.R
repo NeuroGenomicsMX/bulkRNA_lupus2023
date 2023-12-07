@@ -22,14 +22,18 @@ setwd(indir)
 files <- dir(getwd(), pattern = "^DE_*")
 # ---
 # Define plotting function
-plot_volcano <- function(file_name, figdir, abslogFC = 1, noGeneNames = 20){ 
+plot_volcano <- function(file_name, figdir, abslogFC = 1, noGeneNames = 20, plotTitle = F){ 
   # ---
   # file_name: "DE_plotName.csv" with DESeq results are, the plotName part will be used as plot title
   # figdir: place where volcano plots will be saved
   # abslogFC: threshold of logFC (absolute value) for coloring the DE genes
   # noGeneNames: maximum number of genes to write their name for each group (downregulated/upregulated)
+  # plotTitle: add a title to the plot
   # ---
   plot_name <- gsub("^DE_(.+)\\.csv$", "\\1", file_name)
+  if (plotTitle == T) {
+    ptitle <- plot_name
+  } else{ptitle <- ''}
   
   df <- read.csv(file = paste0(file_name), row.names = 'X')
   df <- na.omit(df)
@@ -43,7 +47,7 @@ plot_volcano <- function(file_name, figdir, abslogFC = 1, noGeneNames = 20){
   # Plot
   volcanoplot <- ggplot(df, aes(log2FoldChange, -log(padj,10))) +
     geom_point(aes(color = Expression), size = 0.7) +
-    labs(title = plot_name) +
+    labs(title = ptitle) +
     xlab(expression("log"[2]*"FC")) + 
     ylab(expression("-log"[10]*"p-adj")) +
     scale_color_manual(values = c("dodgerblue3", "gray50", "firebrick3")) +
@@ -83,6 +87,7 @@ for (f in files){
   print(f)
   plot_volcano(f, figdir = '/mnt/Citosina/amedina/lupus/RNA_lupus/DE_P_C_celltypes/figures/',
                abslogFC = 1,
-               noGeneNames = 20)
+               noGeneNames = 20,
+               plotTitle = F)
 }
 
