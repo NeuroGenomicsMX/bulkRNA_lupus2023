@@ -1,8 +1,7 @@
-# DE in moDCs and tolDCs in patients
+# DE moDCs and tolDCs with IMQ in patients
 # Author: Sofia Salazar
 # December 2023
-# Differential expression analysis between moDCs and tolDCs in SLE patients
-# ----
+# -----
 
 # qlogin
 # module load r/4.0.2
@@ -14,13 +13,13 @@ library(DESeq2)
 library(tximport)
 
 workdir <- '/mnt/Citosina/amedina/lupus/RNA_lupus/'
-outdir <- '/mnt/Citosina/amedina/lupus/RNA_lupus/DE_moDC_tolDC_P/DE_files/'
-ddsDir <- '/mnt/Citosina/amedina/lupus/RNA_lupus/DE_moDC_tolDC_P/dds_objects/'
+outdir <- paste0(workdir, 'DE_IMQ_moDC_tolDC_P/DE_files/')
+ddsDir <- paste0(workdir,'DE_IMQ_moDC_tolDC_P/dds_objects/')
 load(file = paste0(workdir, 'counts/txi.RData')) # metadata, txi, tx2gene
 
 # ----Filter metadata----
 
-meta_sub <- metadata[(metadata$Group == 'SLE') & (metadata$Cell_type %in% c('moDC', 'tolDC')),]
+meta_sub <- metadata[(metadata$Group == 'SLE') & (metadata$Cell_type %in% c('moDCIMQ', 'tolDCIMQ')),]
 dim(meta_sub) # [1] 46  6
 
 # ----Construct the DESeqDataset Object (dds)----
@@ -37,36 +36,36 @@ dim(dds_sub) # [1] 29744    46
 # Add comparison to compare SLE moDCs VS SLE tolDCs
 
 dds_sub$Internal <- factor(paste(dds_sub$Group, dds_sub$Cell_type, sep="_"))
-dds_sub$Internal <-  relevel(dds_sub$Internal, ref = 'SLE_moDC')
+dds_sub$Internal <-  relevel(dds_sub$Internal, ref = 'SLE_moDCIMQ')
 unique(dds_sub$Internal)
-# [1] SLE_moDC  SLE_tolDC
-# Levels: SLE_moDC SLE_tolDC
+# [1] SLE_moDCIMQ  SLE_tolDCIMQ
+# Levels: SLE_moDCIMQ SLE_tolDCIMQ
 
 design(dds_sub) <- ~Internal
-save(dds_sub, file = paste0(ddsDir, 'dds_moDC_tolDC_P.RData'))
+save(dds_sub, file = paste0(ddsDir, 'dds_IMQ_moDC_tolDC_P.RData'))
 
 # ----Differential expression analysis----
 
 dds_sub <- DESeq(dds_sub)
 resultsNames(dds_sub) # lists the coefficients
 # [1] "Intercept"                      "Internal_SLE_tolDC_vs_SLE_moDC"
-res_DE <- results(dds_sub, contrast = c('Internal', 'SLE_tolDC', 'SLE_moDC'))
+res_DE <- results(dds_sub, contrast = c('Internal', 'SLE_tolDCIMQ', 'SLE_moDCIMQ'))
 res_DE <- res_DE[order(res_DE$padj),]
 summary(res_DE)
 
-# out of 21870 with nonzero total read count
+# out of 21937 with nonzero total read count
 # adjusted p-value < 0.1
-# LFC > 0 (up)       : 3793, 17%
-# LFC < 0 (down)     : 3856, 18%
+# LFC > 0 (up)       : 3763, 17%
+# LFC < 0 (down)     : 3655, 17%
 # outliers [1]       : 0, 0%
-# low counts [2]     : 3333, 15%
+# low counts [2]     : 2928, 13%
 # (mean count < 0)
 # [1] see 'cooksCutoff' argument of ?results
 # [2] see 'independentFiltering' argument of ?results
 
 # ----Save results----
 
-write.csv(res_DE, file = paste0(outdir, 'DE_moDCs_tolDCs_P.csv'))
+write.csv(res_DE, file = paste0(outdir, 'DE_IMQ_moDC_tolDC_P.csv'))
 
 # ----Session info----
 
@@ -93,12 +92,12 @@ sessionInfo()
 # [8] methods   base     
 # 
 # other attached packages:
-#   [1] DESeq2_1.30.1               SummarizedExperiment_1.20.0
-# [3] Biobase_2.50.0              MatrixGenerics_1.2.1       
-# [5] matrixStats_1.0.0           GenomicRanges_1.42.0       
-# [7] GenomeInfoDb_1.26.7         IRanges_2.24.1             
-# [9] S4Vectors_0.28.1            BiocGenerics_0.36.1        
-# [11] tximport_1.18.0            
+#   [1] tximport_1.18.0             DESeq2_1.30.1              
+# [3] SummarizedExperiment_1.20.0 Biobase_2.50.0             
+# [5] MatrixGenerics_1.2.1        matrixStats_1.0.0          
+# [7] GenomicRanges_1.42.0        GenomeInfoDb_1.26.7        
+# [9] IRanges_2.24.1              S4Vectors_0.28.1           
+# [11] BiocGenerics_0.36.1        
 # 
 # loaded via a namespace (and not attached):
 #   [1] genefilter_1.72.1      locfit_1.5-9.4         tidyselect_1.2.0      
