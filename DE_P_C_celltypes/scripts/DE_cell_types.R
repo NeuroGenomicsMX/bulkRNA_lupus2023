@@ -18,6 +18,7 @@ library(tximport)
 # Load data
 workdir <- '/mnt/Citosina/amedina/lupus/RNA_lupus/'
 outdir <- '/mnt/Citosina/amedina/lupus/RNA_lupus/DE_P_C_celltypes/DE_files/'
+ddsDir <- '/mnt/Citosina/amedina/lupus/RNA_lupus/DE_P_C_celltypes/dds_objects/'
 load(file = paste0(workdir, 'counts/txi.RData')) # metadata, txi, tx2gene
 #########
 # Construct the DESEQDataset Object (dds)
@@ -62,6 +63,7 @@ summary(res_mo_Ordered)
 # outliers [1]       : 0, 0%
 #low counts [2]     : 7903, 36%
 write.csv(res_mo_Ordered, file=paste0(outdir, 'DE_monocytes.csv'))
+save(dds_mo, file = paste0(ddsDir, 'dds_mo.RData'))
 
 #########
 # DE of moDC (group 1)
@@ -96,7 +98,7 @@ summary(res_moDC_Ordered)
 # [2] see 'independentFiltering' argument of ?results
 
 write.csv(res_moDC_Ordered, file=paste0(outdir, 'DE_moDCs.csv'))
-
+save(dds_moDC, file = paste0(ddsDir, 'dds_moDCs.RData'))
 #######
 # DE moDC + IMQ (group 2)
 
@@ -129,6 +131,7 @@ summary(res_moDC_IMQ_Ordered)
 # low counts [2]     : 4108, 19%
 
 write.csv(res_moDC_IMQ_Ordered, file=paste0(outdir, 'DE_moDCs_IMQ.csv'))
+save(dds_moDC_IMQ, file = paste0(ddsDir, 'dds_moDCs_IMQ.RData'))
 
 #######
 # DE tolDC (Group 3)
@@ -166,7 +169,7 @@ summary(res_tolDC_Ordered)
 
 
 write.csv(res_tolDC_Ordered, file=paste0(outdir, 'DE_tolDCs.csv'))
-
+save(dds_tolDC, file = paste0(ddsDir, 'dds_tolDCs.RData'))
 #########
 # DE tolDCs + IMQ (group 4)
 # ---
@@ -197,6 +200,7 @@ summary(res_tolDC_IMQ_Ordered)
 # outliers [1]       : 0, 0%
 # low counts [2]     : 9, 0.042%
 write.csv(res_tolDC_IMQ_Ordered, file=paste0(outdir, 'DE_tolDCs_IMQ.csv'))
+save(dds_tolDC_IMQ, file = paste0(ddsDir, 'dds_tolDCs_IMQ.RData'))
 
 # ----
 sessionInfo()
