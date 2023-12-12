@@ -1,4 +1,4 @@
-# Plot a heatmap from expression data
+# Plot Heatmap for moDCs and tolDCs with GC and age annotations
 # Author: Sofia Salazar
 # December 2023
 # -----
@@ -50,9 +50,14 @@ plot_heatmap <- function(dds_object, DEresultsFile, metadata, figdir, plotName, 
   filtered_DGE <- DGE_ordered[matching_rows, ]
   l2_val <- as.matrix(filtered_DGE$log2FoldChange)
   
+  # ---order samples by dosage
+  ordered_samples <- metadata[order(metadata$Dosis), ]
+  
   # ---order samples by condition---
   
-  ordered_samples <- metadata[order(metadata[[columnContrast]]), ]
+  ordered_samples <- ordered_samples[order(ordered_samples[[columnContrast]]), ]
+  
+  
   
   # order columns of count matrix
   ordered_mat <- mat[, ordered_samples$sample_ID]
@@ -67,15 +72,27 @@ plot_heatmap <- function(dds_object, DEresultsFile, metadata, figdir, plotName, 
   print(levels(as.factor(ordered_samples[[columnContrast]]))[1])
   print(levels(as.factor(ordered_samples[[columnContrast]]))[2])
   ha_samples <- HeatmapAnnotation(Group = c(ordered_samples[,columnContrast]),
-                                  col = list(Group = c('moDC' = '#40E0D0', 'tolDC' = '#A0522D')))
+                                  col = list(Group = c('moDC' = '#40E0D0', 'tolDC' = '#a62d6b')))
   # logFC color
   
   # col_logFC <- colorRamp2(c(min(l2_val, na.rm = TRUE), 0, max(l2_val, na.rm = TRUE)), c('#34a624','white','#a709eb'))
   #row_ha <- rowAnnotation(log2FC = l2_val, col = list(log2FC = col_logFC))
   
+  # GC dosage annotation
+  gc_val = ordered_samples$Dosis
+  levels(as.factor(gc_val))
+  
+  gc_col =c("0" = "#7b807a","2.5" = "#a1db95", "3" = "#a195db", "5"= "#8d49c4", "8" = "#423485")
+  gc_samples <- HeatmapAnnotation(GC Dosage = gc_val, col = list(GC Dosage = gc_col))
+  
+  # Age annotation
+  age_val = ordered_samples$Edad
+  col_age <- colorRamp2(c(min(age_val), max(age_val)), c('#e6d1be','#bd5a00'))
+  age_samples <- HeatmapAnnotation(Age = age_val, col = list(Age = col_age))
+  
   heatmap_figure <- Heatmap(ordered_mat, cluster_rows = clusterRows, cluster_columns = F, name = 'Z-score',
                             # left_annotation = row_ha, 
-                            top_annotation = ha_samples,
+                            top_annotation = c(ha_samples,age_samples,gc_samples),
                             column_split = split, col = col_exp)
   
   
