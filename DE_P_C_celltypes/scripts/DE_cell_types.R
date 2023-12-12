@@ -40,6 +40,7 @@ dds_mo <- dds[,mo_df$sample_ID]
 dds_mo$Group <- relevel(dds_mo$Group, ref = 'Ctrl')
 unique(dds_mo$Group)
 design(dds_mo) <- ~Group
+save(dds_mo, file = paste0(ddsDir, 'dds_mo.RData'))
 # [1] Ctrl SLE 
 # ---
 # Add comparison
@@ -63,7 +64,6 @@ summary(res_mo_Ordered)
 # outliers [1]       : 0, 0%
 #low counts [2]     : 7903, 36%
 write.csv(res_mo_Ordered, file=paste0(outdir, 'DE_monocytes.csv'))
-save(dds_mo, file = paste0(ddsDir, 'dds_mo.RData'))
 
 #########
 # DE of moDC (group 1)
@@ -76,6 +76,7 @@ dds_moDC <- dds[,moDC_df$sample_ID]
 dds_moDC$Group <- relevel(dds_moDC$Group, ref = 'Ctrl')
 unique(dds_moDC$Group)
 design(dds_moDC) <- ~Group
+save(dds_moDC, file = paste0(ddsDir, 'dds_moDCs.RData'))
 
 # ---
 # Differential expression analysis
@@ -98,7 +99,6 @@ summary(res_moDC_Ordered)
 # [2] see 'independentFiltering' argument of ?results
 
 write.csv(res_moDC_Ordered, file=paste0(outdir, 'DE_moDCs.csv'))
-save(dds_moDC, file = paste0(ddsDir, 'dds_moDCs.RData'))
 #######
 # DE moDC + IMQ (group 2)
 
@@ -112,6 +112,8 @@ dds_moDC_IMQ <- dds[,moDC_IMQ_df$sample_ID]
 dds_moDC_IMQ$Group <- relevel(dds_moDC_IMQ$Group, ref = 'Ctrl')
 unique(dds_moDC_IMQ$Group)
 design(dds_moDC_IMQ) <- ~Group
+save(dds_moDC_IMQ, file = paste0(ddsDir, 'dds_moDCs_IMQ.RData'))
+
 # ---
 # Differential expression analysis
 
@@ -131,7 +133,6 @@ summary(res_moDC_IMQ_Ordered)
 # low counts [2]     : 4108, 19%
 
 write.csv(res_moDC_IMQ_Ordered, file=paste0(outdir, 'DE_moDCs_IMQ.csv'))
-save(dds_moDC_IMQ, file = paste0(ddsDir, 'dds_moDCs_IMQ.RData'))
 
 #######
 # DE tolDC (Group 3)
@@ -147,6 +148,7 @@ dds_tolDC <- dds[,tolDC_df$sample_ID]
 dds_tolDC$Group <- relevel(dds_tolDC$Group, ref = 'Ctrl')
 unique(dds_tolDC$Group)
 design(dds_tolDC) <- ~Group
+save(dds_tolDC, file = paste0(ddsDir, 'dds_tolDCs.RData'))
 
 # ---
 # Differential expression analysis
@@ -169,7 +171,6 @@ summary(res_tolDC_Ordered)
 
 
 write.csv(res_tolDC_Ordered, file=paste0(outdir, 'DE_tolDCs.csv'))
-save(dds_tolDC, file = paste0(ddsDir, 'dds_tolDCs.RData'))
 #########
 # DE tolDCs + IMQ (group 4)
 # ---
@@ -183,6 +184,8 @@ dds_tolDC_IMQ <- dds[,tolDC_IMQ_df$sample_ID]
 dds_tolDC_IMQ$Group <- relevel(dds_tolDC_IMQ$Group, ref = 'Ctrl')
 unique(dds_tolDC_IMQ$Group)
 design(dds_tolDC_IMQ) <- ~Group
+save(dds_tolDC_IMQ, file = paste0(ddsDir, 'dds_tolDCs_IMQ.RData'))
+
 # ---
 # Differential expression analysis
 
@@ -200,7 +203,6 @@ summary(res_tolDC_IMQ_Ordered)
 # outliers [1]       : 0, 0%
 # low counts [2]     : 9, 0.042%
 write.csv(res_tolDC_IMQ_Ordered, file=paste0(outdir, 'DE_tolDCs_IMQ.csv'))
-save(dds_tolDC_IMQ, file = paste0(ddsDir, 'dds_tolDCs_IMQ.RData'))
 
 # ----
 sessionInfo()
