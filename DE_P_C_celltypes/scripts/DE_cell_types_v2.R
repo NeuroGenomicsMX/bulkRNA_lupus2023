@@ -21,7 +21,7 @@ outdir <- '/mnt/Citosina/amedina/lupus/RNA_lupus/DE_P_C_celltypes/DE_files/'
 load(file = paste0(workdir, 'counts/txi.RData')) # metadata, txi, tx2gene
 samples <- metadata$sample_ID #165, colnames(txi$counts)
 
-#########
+#########################
 # DE of monoctyes 
 # as.factor
 metadata$Age <- as.factor(metadata$Age)
@@ -34,7 +34,6 @@ metadata$Other_tx <- as.factor(metadata$Other_tx)
 metadata$Cell_type <- as.factor(metadata$Cell_type)
 
 ## --- quality control -----
-# Only control from all cell types
 mo_df <- metadata[metadata$Cell_type == 'monocyte',]
 mo_df$group <-as.factor(mo_df$Group)
 dim(mo_df)
@@ -60,7 +59,7 @@ dds
 # colData names(6): sample_ID Group ... Edad Cell_type
 
 
-# ---- Monocyes -----
+# ---- Monocytes -----
 # Select only monocytes
 dds_mo <- dds[, mo_df$sample_ID] # select columns
 dim(dds_mo)
@@ -68,6 +67,7 @@ dim(dds_mo)
 
 # Add comparison
 dds_mo$Internal <- factor(paste(dds_mo$Group, dds_mo$Dose, sep="_"))
+# Levels: Ctrl_0 SLE_0 SLE_2.5 SLE_3 SLE_5 SLE_8
 dds_mo$Internal <-  relevel(dds_mo$Internal, ref = 'Ctrl_0') #referencia =control
 
 # corregir levels
@@ -213,76 +213,154 @@ summary(res_mo_8_Ordered)
 
 write.csv(res_mo_8_Ordered, file=paste0(outdir, 'DE_monocytes_SLEVSCtrl_Dose8.csv'))
 
-# ---- moDC -----
-# DE of moDC (group 1)
-# ---
-# quality control
-moDC_df <- metadata[metadata$Cell_type == "moDC",]
-moDC_df$Group <-as.factor(moDC_df$Group)
-dim(moDC_df)
-# [1] 33  6
-
-moDC_counts <- counts[, moDC_df$sample_ID]
-moDC_counts <- as.matrix(moDC_counts)
-dim(moDC_counts)
+#########################
+# --------------- moDC ------------------
+# DE of moDC
+moDC_df <- metadata[metadata$Cell_type == 'moDC',]
+moDC_df$group <-as.factor(moDC_df$Group)
+dim(moDC_df) #[1] 33 10
+# Select only moDCs
+dds_moDC <- dds[, moDC_df$sample_ID] # select columns
+dim(dds_moDC)
 # [1] 29744    33
 
-all((moDC_df$sample_ID) %in% colnames(moDC_counts))
-# [1] TRUE
+# Add comparison
+dds_moDC$Internal <- factor(paste(dds_moDC$Group, dds_moDC$Dose, sep="_"))
+# Levels: Ctrl_0 SLE_0 SLE_2.5 SLE_3 SLE_5 SLE_8
+dds_moDC$Internal <-  relevel(dds_moDC$Internal, ref = 'Ctrl_0') #referencia =control
 
-identical(moDC_df$sample_ID, colnames(moDC_counts))
-# [1] TRUE
+# corregir levels
+unique(dds_moDC$Cell_type)
+dds_moDC$Cell_type <- factor(dds_moDC$Cell_type, levels = unique(dds_moDC$Cell_type))
 
-dds_moDC <- DESeqDataSetFromMatrix(countData = round(moDC_counts),
-                                   colData = moDC_df,
-                                   design = ~ Group)
-dds_moDC
-# class: DESeqDataSet 
-# dim: 29744 33 
-# metadata(1): version
-# assays(1): counts
-# rownames(29744): A1BG A1BG-AS1 ... ZZEF1 ZZZ3
-# rowData names(0):
-#   colnames(33): QR011_1 QR013_1 ... QR107_1 QR108_1
-# colData names(6): sample_ID Group ... Edad Cell_type
+# corregir levels
 
+design(dds_moDC) <- ~ Group_age + Internal
+design(dds_moDC)
 
-dds_moDC$Group <- relevel(dds_moDC$Group, ref = 'Ctrl')
-
-# ---
-# Differential expression analysis
+### --- Differential expression analysis --------
 
 dds_moDC <- DESeq(dds_moDC)
-res_moDC <- results(dds_moDC)
+resultsNames(dds_moDC) # lists the coefficients
+
+# [1] "Intercept"                  "Group_age_more30_vs_less30"
+# [3] "Internal_SLE_0_vs_Ctrl_0"   "Internal_SLE_2.5_vs_Ctrl_0"
+# [5] "Internal_SLE_3_vs_Ctrl_0"   "Internal_SLE_5_vs_Ctrl_0"
+# [7] "Internal_SLE_8_vs_Ctrl_0"
+
+### --- Contrast 0 (more_30 vs less_30) -----
+res_moDCs_Group_age_compare <- results(dds_moDC, name="Group_age_more30_vs_less30")
+res_moDCs_Group_age_compare
+
+res_moDCs_Group_age_compare_Ordered <- res_moDCs_Group_age_compare[order(res_moDCs_Group_age_compare$padj),]
+summary(res_moDCs_Group_age_compare_Ordered)
+
+# out of 21581 with nonzero total read count
+# adjusted p-value < 0.1
+# LFC > 0 (up)       : 8, 0.037%
+# LFC < 0 (down)     : 135, 0.63%
+# outliers [1]       : 23, 0.11%
+# low counts [2]     : 4511, 21%
+
+# Save results
+write.csv(res_moDCs_Group_age_compare_Ordered, file=paste0(outdir, 'DE_moDCs_more30_vs_less30.csv'))
+
+### --- Contrast 1 (monocytes)(SLE vs control) (Dose 0) -----
+res_moDC <- results(dds_moDC, name="Internal_SLE_0_vs_Ctrl_0")
 res_moDC
-
-# log2 fold change (MLE): Group SLE vs Ctrl 
-# Wald test p-value: Group SLE vs Ctrl 
-# DataFrame with 29744 rows and 6 columns
-# baseMean log2FoldChange     lfcSE      stat    pvalue      padj
-# <numeric>      <numeric> <numeric> <numeric> <numeric> <numeric>
-#   A1BG     1.59920e+02       0.211916  0.222953  0.950496  0.341860  0.955629
-# A1BG-AS1 1.40651e+02       0.348923  0.214270  1.628425  0.103435  0.764383
-# A1CF     3.38072e-02      -0.358145  3.232919 -0.110781  0.911790        NA
-# A2M      2.69539e+04      -0.278239  0.275066 -1.011533  0.311762  0.942457
-
 
 res_moDC_Ordered <- res_moDC[order(res_moDC$padj),]
 summary(res_moDC_Ordered)
-# out of 21576 with nonzero total read count
+
+# out of 21581 with nonzero total read count
 # adjusted p-value < 0.1
-# LFC > 0 (up)       : 27, 0.13%
-# LFC < 0 (down)     : 154, 0.71%
-# outliers [1]       : 0, 0%
-# low counts [2]     : 4108, 19%
+# LFC > 0 (up)       : 10, 0.046%
+# LFC < 0 (down)     : 9, 0.042%
+# outliers [1]       : 23, 0.11%
+# low counts [2]     : 413, 1.9%
+# [1] see 'cooksCutoff' argument of ?results
+# [2] see 'independentFiltering' argument of ?results
+
+write.csv(res_moDC_Ordered, file=paste0(outdir, 'DE_moDCs_SLEVSCtrl_Dose0.csv'))
+
+### --- Contrast 1 (monocytes)(SLE vs control)(Dose_2.5_vs_0) -----
+res_moDC_2_5 <- results(dds_moDC, name="Internal_SLE_2.5_vs_Ctrl_0")
+res_moDC_2_5
+
+res_moDC_2_5_Ordered <- res_moDC_2_5[order(res_moDC_2_5$padj),]
+summary(res_moDC_2_5_Ordered)
+
+# out of 21581 with nonzero total read count
+# adjusted p-value < 0.1
+# LFC > 0 (up)       : 2, 0.0093%
+# LFC < 0 (down)     : 7, 0.032%
+# outliers [1]       : 23, 0.11%
+# low counts [2]     : 3, 0.014%
+# (mean count < 0)
+# [1] see 'cooksCutoff' argument of ?results
+# [2] see 'independentFiltering' argument of ?results
+
+write.csv(res_moDC_2_5_Ordered, file=paste0(outdir, 'DE_moDCs_SLEVSCtrl_Dose2_5.csv'))
+
+### --- Contrast 1 (monocytes)(SLE vs control)(Dose_3_vs_0) -----
+res_moDC_3 <- results(dds_moDC, name="Internal_SLE_3_vs_Ctrl_0")
+res_moDC_3
+
+res_moDC_3_Ordered <- res_moDC_3[order(res_moDC_3$padj),]
+summary(res_moDC_3_Ordered)
+
+# out of 21581 with nonzero total read count
+# adjusted p-value < 0.1
+# LFC > 0 (up)       : 1, 0.0046%
+# LFC < 0 (down)     : 5, 0.023%
+# outliers [1]       : 23, 0.11%
+# low counts [2]     : 3, 0.014%
 # (mean count < 1)
 # [1] see 'cooksCutoff' argument of ?results
 # [2] see 'independentFiltering' argument of ?results
 
-write.csv(res_moDC_Ordered, file=paste0(outdir, 'DE_moDCs.csv'))
+write.csv(res_moDC_3_Ordered, file=paste0(outdir, 'DE_moDCs_SLEVSCtrl_Dose3.csv'))
 
-#######
-# DE moDC + IMQ (group 2)
+### --- Contrast 1 (monocytes)(SLE vs control)(Dose_5_vs_0) -----
+res_moDC_5 <- results(dds_moDC, name="Internal_SLE_5_vs_Ctrl_0")
+res_moDC_5
+
+res_moDC_5_Ordered <- res_moDC_5[order(res_moDC_5$padj),]
+summary(res_moDC_5_Ordered)
+
+# out of 21581 with nonzero total read count
+# adjusted p-value < 0.1
+# LFC > 0 (up)       : 5, 0.023%
+# LFC < 0 (down)     : 3, 0.014%
+# outliers [1]       : 23, 0.11%
+# low counts [2]     : 3, 0.014%
+# (mean count < 8)
+# [1] see 'cooksCutoff' argument of ?results
+# [2] see 'independentFiltering' argument of ?results
+
+write.csv(res_moDC_5_Ordered, file=paste0(outdir, 'DE_moDCs_SLEVSCtrl_Dose5.csv'))
+
+### --- Contrast 1 (monocytes)(SLE vs control)(Dose_8_vs_0) -----
+res_moDC_8 <- results(dds_moDC, name="Internal_SLE_8_vs_Ctrl_0")
+res_moDC_8
+
+res_moDC_8_Ordered <- res_moDC_8[order(res_moDC_8$padj),]
+summary(res_moDC_8_Ordered)
+
+# out of 21581 with nonzero total read count
+# adjusted p-value < 0.1
+# LFC > 0 (up)       : 4, 0.019%
+# LFC < 0 (down)     : 29, 0.13%
+# outliers [1]       : 23, 0.11%
+# low counts [2]     : 2874, 13%
+
+
+write.csv(res_moDC_8_Ordered, file=paste0(outdir, 'DE_moDCs_SLEVSCtrl_Dose8.csv'))
+
+
+
+##########################
+# --------------DE moDC + IMQ (group 2)--------------
 
 # ---
 # quality control
