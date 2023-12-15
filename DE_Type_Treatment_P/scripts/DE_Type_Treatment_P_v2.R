@@ -1,6 +1,6 @@
 # DE types - Treatment P
 # Author: Evelia Coss
-# Date: 5 Dec 2023
+# Date: 14 Dec 2023
 # Differential expression between 5 cell types in the Lupus condition
 # ---
 
@@ -64,20 +64,31 @@ dds_SLE <- dds[, SLE_df$sample_ID] # select columns
 dim(dds_SLE)
 #[1] 29744   115
 
+# corregir levels
+dds_SLE$Cell_type <-  relevel(dds_SLE$Cell_type, ref = 'monocyte')
+
+# corregir levels
+dds_SLE$Dose <-  relevel(dds_SLE$Dose, ref = '0')
+
 # to compare Ctrl_moDC vs Ctrl_monocyte, make Ctrl_monocyte the reference level,
 # and select the last coefficient
 
 # Design
-design(dds_SLE) <- ~ Group_age + Cell_type
-design(dds_SLE) # ~ Group_age + Cell_type
+design(dds_SLE) <- ~ Group_age + Cell_type + Dose
+design(dds_SLE) # ~ Group_age + Cell_type + Dose
 
 ## --- Differential expression analysis ----
 dds_SLE <- DESeq(dds_SLE)
 resultsNames(dds_SLE) # lists the coefficients
 
-# [1] "Intercept"                  "Group_age_more30_vs_less30"
-# [3] "Cell_type_moDCIMQ_vs_moDC"  "Cell_type_monocyte_vs_moDC"
-# [5] "Cell_type_tolDC_vs_moDC"    "Cell_type_tolDCIMQ_vs_moDC"
+# [1] "Intercept"                      "Group_age_more30_vs_less30"
+# [3] "Cell_type_moDC_vs_monocyte"     "Cell_type_moDCIMQ_vs_monocyte"
+# [5] "Cell_type_tolDC_vs_monocyte"    "Cell_type_tolDCIMQ_vs_monocyte"
+# [7] "Dose_2.5_vs_0"                  "Dose_3_vs_0"
+# [9] "Dose_5_vs_0"                    "Dose_8_vs_0"
+
+# save
+save(metadata, dds_SLE, file = paste0(outdir, 'dds_SLE.RData'))
 
 # --- Contrast 0 (more_30 vs less_30) -----
 res_SLE_Group_age <- results(dds_SLE, name="Group_age_more30_vs_less30")
@@ -86,12 +97,12 @@ res_SLE_Group_age
 res_SLE_Group_age_Ordered <- res_SLE_Group_age[order(res_SLE_Group_age$padj),]
 summary(res_SLE_Group_age_Ordered)
 
-# out of 23215 with nonzero total read count
+#out of 23215 with nonzero total read count
 # adjusted p-value < 0.1
-# LFC > 0 (up)       : 199, 0.86%
-# LFC < 0 (down)     : 252, 1.1%
-# outliers [1]       : 0, 0%
-# low counts [2]     : 5321, 23%
+# LFC > 0 (up)       : 300, 1.3%
+# LFC < 0 (down)     : 344, 1.5%
+# outliers [1]       : 7, 0.03%
+# low counts [2]     : 5764, 25%
 # (mean count < 1)
 # [1] see 'cooksCutoff' argument of ?results
 # [2] see 'independentFiltering' argument of ?results
@@ -107,15 +118,17 @@ res_SLE_moVSmoDC
 res_SLE_moVSmoDC_Ordered <- res_SLE_moVSmoDC[order(res_SLE_moVSmoDC$padj),]
 summary(res_SLE_moVSmoDC_Ordered)
 
+# 
 # out of 23215 with nonzero total read count
 # adjusted p-value < 0.1
-# LFC > 0 (up)       : 6943, 30%
-# LFC < 0 (down)     : 8070, 35%
-# outliers [1]       : 0, 0%
+# LFC > 0 (up)       : 6904, 30%
+# LFC < 0 (down)     : 8105, 35%
+# outliers [1]       : 7, 0.03%
 # low counts [2]     : 3104, 13%
 # (mean count < 0)
 # [1] see 'cooksCutoff' argument of ?results
 # [2] see 'independentFiltering' argument of ?results
+
 
 # Save results
 write.csv(res_SLE_moVSmoDC_Ordered, file=paste0(outdir, 'DE_SLE_moVSmoDC.csv'))
@@ -127,15 +140,17 @@ res_SLE_moVSmoDCIMQ
 res_SLE_moVSmoDCIMQ_Ordered <- res_SLE_moVSmoDCIMQ[order(res_SLE_moVSmoDCIMQ$padj),]
 summary(res_SLE_moVSmoDCIMQ_Ordered)
 
-#out of 23215 with nonzero total read count
+#
+# out of 23215 with nonzero total read count
 # adjusted p-value < 0.1
-# LFC > 0 (up)       : 6846, 29%
-# LFC < 0 (down)     : 8061, 35%
-# outliers [1]       : 0, 0%
-# low counts [2]     : 3104, 13%
+# LFC > 0 (up)       : 6808, 29%
+# LFC < 0 (down)     : 8120, 35%
+# outliers [1]       : 7, 0.03%
+# low counts [2]     : 2661, 11%
 # (mean count < 0)
 # [1] see 'cooksCutoff' argument of ?results
 # [2] see 'independentFiltering' argument of ?results
+
 
 # Save results
 write.csv(res_SLE_moVSmoDCIMQ_Ordered, file=paste0(outdir, 'DE_SLE_moVSmoDCIMQ.csv'))
@@ -149,13 +164,14 @@ summary(res_SLE_moVStolDC_Ordered)
 
 # out of 23215 with nonzero total read count
 # adjusted p-value < 0.1
-# LFC > 0 (up)       : 6811, 29%
-# LFC < 0 (down)     : 7997, 34%
-# outliers [1]       : 0, 0%
-# low counts [2]     : 3104, 13%
+# LFC > 0 (up)       : 6781, 29%
+# LFC < 0 (down)     : 8082, 35%
+# outliers [1]       : 7, 0.03%
+# low counts [2]     : 3548, 15%
 # (mean count < 0)
 # [1] see 'cooksCutoff' argument of ?results
 # [2] see 'independentFiltering' argument of ?results
+
 
 # Save results
 write.csv(res_SLE_moVStolDC_Ordered, file=paste0(outdir, 'DE_SLE_moVStolDC.csv'))
@@ -169,10 +185,10 @@ summary(res_SLE_moVStolDCIMQ_Ordered)
 
 # out of 23215 with nonzero total read count
 # adjusted p-value < 0.1
-# LFC > 0 (up)       : 6847, 29%
-# LFC < 0 (down)     : 8072, 35%
-# outliers [1]       : 0, 0%
-# low counts [2]     : 3104, 13%
+# LFC > 0 (up)       : 6819, 29%
+# LFC < 0 (down)     : 8112, 35%
+# outliers [1]       : 7, 0.03%
+# low counts [2]     : 3548, 15%
 # (mean count < 0)
 # [1] see 'cooksCutoff' argument of ?results
 # [2] see 'independentFiltering' argument of ?results
@@ -180,9 +196,95 @@ summary(res_SLE_moVStolDCIMQ_Ordered)
 # Save results
 write.csv(res_SLE_moVStolDCIMQ_Ordered, file=paste0(outdir, 'DE_SLE_moVStolDCIMQ.csv'))
 
+# --- Contrast 5 (Dosis 2.5  vs 0) (todos los tipos celulares) -----
+res_SLE_Dose2_5VS0 <- results(dds_SLE, name="Dose_2.5_vs_0")
+res_SLE_Dose2_5VS0
+
+res_SLE_Dose2_5VS0_Ordered <- res_SLE_Dose2_5VS0[order(res_SLE_Dose2_5VS0$padj),]
+summary(res_SLE_Dose2_5VS0_Ordered)
+
+# out of 23215 with nonzero total read count
+# adjusted p-value < 0.1
+# LFC > 0 (up)       : 1774, 7.6%
+# LFC < 0 (down)     : 2350, 10%
+# outliers [1]       : 7, 0.03%
+# low counts [2]     : 5764, 25%
+# (mean count < 1)
+# [1] see 'cooksCutoff' argument of ?results
+# [2] see 'independentFiltering' argument of ?results
+
+
+# Save results
+write.csv(res_SLE_Dose2_5VS0_Ordered, file=paste0(outdir, 'DE_SLE_Dose2_5VS0.csv'))
+
+# --- Contrast 6 (Dosis 3 vs 0) (todos los tipos celulares) -----
+res_SLE_Dose3VS0 <- results(dds_SLE, name="Dose_3_vs_0")
+res_SLE_Dose3VS0
+
+res_SLE_Dose3VS0_Ordered <- res_SLE_Dose3VS0[order(res_SLE_Dose3VS0$padj),]
+summary(res_SLE_Dose3VS0_Ordered)
+
+# out of 23215 with nonzero total read count
+# adjusted p-value < 0.1
+# LFC > 0 (up)       : 194, 0.84%
+# LFC < 0 (down)     : 486, 2.1%
+# outliers [1]       : 7, 0.03%
+# low counts [2]     : 7534, 32%
+# (mean count < 4)
+# [1] see 'cooksCutoff' argument of ?results
+# [2] see 'independentFiltering' argument of ?results
+
+
+# Save results
+write.csv(res_SLE_Dose3VS0_Ordered, file=paste0(outdir, 'DE_SLE_Dose3VS0.csv'))
+
+# --- Contrast 7 (Dosis 5  vs 0) (todos los tipos celulares) -----
+res_SLE_Dose5VS0 <- results(dds_SLE, name="Dose_5_vs_0")
+res_SLE_Dose5VS0
+
+res_SLE_Dose5VS0_Ordered <- res_SLE_Dose5VS0[order(res_SLE_Dose5VS0$padj),]
+summary(res_SLE_Dose5VS0_Ordered)
+
+# out of 23215 with nonzero total read count
+# adjusted p-value < 0.1
+# LFC > 0 (up)       : 1234, 5.3%
+# LFC < 0 (down)     : 1877, 8.1%
+# outliers [1]       : 7, 0.03%
+# low counts [2]     : 6205, 27%
+# (mean count < 2)
+# [1] see 'cooksCutoff' argument of ?results
+# [2] see 'independentFiltering' argument of ?results
+
+
+# Save results
+write.csv(res_SLE_Dose5VS0_Ordered, file=paste0(outdir, 'DE_SLE_Dose5VS0.csv'))
+
+# --- Contrast 7 (Dosis 8  vs 0) (todos los tipos celulares) -----
+res_SLE_Dose8VS0 <- results(dds_SLE, name="Dose_8_vs_0")
+res_SLE_Dose8VS0
+
+res_SLE_Dose8VS0_Ordered <- res_SLE_Dose8VS0[order(res_SLE_Dose8VS0$padj),]
+summary(res_SLE_Dose8VS0_Ordered)
+
+# out of 23215 with nonzero total read count
+# adjusted p-value < 0.1
+# LFC > 0 (up)       : 544, 2.3%
+# LFC < 0 (down)     : 1149, 4.9%
+# outliers [1]       : 7, 0.03%
+# low counts [2]     : 6648, 29%
+# (mean count < 2)
+# [1] see 'cooksCutoff' argument of ?results
+# [2] see 'independentFiltering' argument of ?results
+
+
+# Save results
+write.csv(res_SLE_Dose8VS0_Ordered, file=paste0(outdir, 'DE_SLE_Dose8VS0.csv'))
+
 # --- Save workspace ----
 save(res_SLE_moVSmoDC_Ordered, res_SLE_moVSmoDCIMQ_Ordered, res_SLE_moVStolDC_Ordered, 
-     res_SLE_moVStolDCIMQ_Ordered, file = paste0(outdir, 'DE_SLE_results.RData'))
+     res_SLE_moVStolDCIMQ_Ordered, res_SLE_Dose8VS0_Ordered, res_SLE_Dose5VS0_Ordered,
+     res_SLE_Dose3VS0_Ordered, res_SLE_Dose2_5VS0_Ordered,
+     file = paste0(outdir, 'DE_SLE_results.RData'))
 
 # ---- Information of session ----
 sessionInfo()
