@@ -16,4 +16,6 @@
 - Control monocytes vs cell types (scripts and figures): `/mnt/Citosina/amedina/lupus/RNA_lupus/DE_Type_Treatment_C/`
 - SLE monocytes vs cell types (scripts and figures): `/mnt/Citosina/amedina/lupus/RNA_lupus/DE_Type_Treatment_P/`
 
-Put your results in the [slides](https://docs.google.com/presentation/d/1BnyCKKPgfXBw9XkvsQ5q5YqqkvZhU0goQJVFWjv50fk/edit?usp=sharing)
+Put your results in the [slides v2](https://docs.google.com/presentation/d/1DQoTvv-cgF3cAFmW4qlh9gkAIVq7kbe7KUO0xd-4fM8/edit?usp=sharing)
+
+- [slides v1](https://docs.google.com/presentation/d/1BnyCKKPgfXBw9XkvsQ5q5YqqkvZhU0goQJVFWjv50fk/edit?usp=sharing)
